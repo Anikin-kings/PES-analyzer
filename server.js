@@ -1,6 +1,8 @@
 // Solar Market Trend Analyzer - Backend Server
 // This server provides real data from various free APIs
 
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -16,13 +18,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// In-memory storage (replace with database in production)
+// In-memory stonpm install --save-dev nodemonnpm install --save-dev nodemonrage (replace with database in production)
 let marketData = [];
 let trendAnalysis = [];
 
 // API Keys and Endpoints (using free services)
-const NEWS_API_KEY = 'YOUR_FREE_NEWS_API_KEY'; // Get from newsapi.org (free tier)
-const ALPHA_VANTAGE_KEY = 'YOUR_FREE_ALPHA_VANTAGE_KEY'; // Get from alphavantage.co (free)
+const NEWS_API_KEY = process.env.NEWS_API_KEY;
+const ALPHA_VANTAGE_KEY = process.env.ALPHA_VANTAGE_KEY;
+const POLYGON_API_KEY = process.env.POLYGON_API_KEY;
+const OPENWEATHER_KEY = process.env.OPENWEATHER_KEY;
+const RSS2JSON_KEY = process.env.RSS2JSON_KEY;
 
 // Free APIs Configuration
 const API_ENDPOINTS = {
