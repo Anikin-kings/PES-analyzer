@@ -1,8 +1,6 @@
 // Solar Market Trend Analyzer - Backend Server
 // This server provides real data from various free APIs
 
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -18,16 +16,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// In-memory stonpm install --save-dev nodemonnpm install --save-dev nodemonrage (replace with database in production)
+// In-memory storage (replace with database in production)
 let marketData = [];
 let trendAnalysis = [];
 
 // API Keys and Endpoints (using free services)
-const NEWS_API_KEY = process.env.NEWS_API_KEY;
-const ALPHA_VANTAGE_KEY = process.env.ALPHA_VANTAGE_KEY;
-const POLYGON_API_KEY = process.env.POLYGON_API_KEY;
-const OPENWEATHER_KEY = process.env.OPENWEATHER_KEY;
-const RSS2JSON_KEY = process.env.RSS2JSON_KEY;
+const NEWS_API_KEY = '0a93de74c584479eac928bb60edef595'; // Get from newsapi.org (free tier)
+const ALPHA_VANTAGE_KEY = 'TGBKPZ6F4FUK8ZYJ'; // Get from alphavantage.co (free)
 
 // Free APIs Configuration
 const API_ENDPOINTS = {
@@ -95,7 +90,7 @@ class SolarMarketAnalyzer {
             const response = await axios.get('https://api.rss2json.com/v1/api.json', {
                 params: {
                     rss_url: 'https://feeds.feedburner.com/oreilly/radar',
-                    api_key: 'your-free-api-key', // Get from rss2json.com
+                    api_key: '7lp0ujzbufopxdt4lositcd4jrzrw27h93egd0k3', // Get from rss2json.com
                     count: 10
                 }
             });
@@ -145,7 +140,7 @@ class SolarMarketAnalyzer {
                 // Using free stock API
                 const response = await axios.get('https://api.polygon.io/v2/aggs/ticker/' + symbol + '/prev', {
                     params: {
-                        apikey: 'your-free-polygon-key' // Get from polygon.io
+                        apikey: 'cOPm5xT9YhFaCd4_MBTTAeSo_Qcd2jOH' // Get from polygon.io
                     }
                 });
                 
@@ -189,7 +184,7 @@ class SolarMarketAnalyzer {
                 const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
                     params: {
                         q: city,
-                        appid: 'your-free-openweather-key', // Get from openweathermap.org
+                        appid: '84862736401d3bc1780dd8414b72b4cc', // Get from openweathermap.org
                         units: 'metric'
                     }
                 });
