@@ -80,6 +80,76 @@ class SolarMarketAnalyzer {
         }
     }
 
+    // --- START OF ADDED CODE --- //
+    // This function processes the raw data from all sources
+    processResults(results, category, timeframe) {
+        let combinedData = [];
+
+        // 1. Process News Data (from results[0])
+        if (results[0].status === 'fulfilled' && results[0].value) {
+            const newsItems = results[0].value.map(item => ({
+                date: new Date(item.pubDate || item.publishedAt).toISOString().split('T')[0],
+                product: this.extractProductFromText(item.title),
+                priceTrend: 'N/A',
+                sentiment: this.analyzeSentiment(item.title),
+                volume: 'Low',
+                source: 'News Feed',
+            }));
+            combinedData = combinedData.concat(newsItems);
+        }
+
+        // 2. Process Reddit Data (from results[1])
+        if (results[1].status === 'fulfilled' && results[1].value) {
+            const redditPosts = results[1].value.map(post => ({
+                date: new Date(post.created).toISOString().split('T')[0],
+                product: this.extractProductFromText(post.title),
+                priceTrend: 'N/A',
+                sentiment: post.sentiment,
+                volume: post.comments ? post.comments.toLocaleString() : '0',
+                source: 'Reddit',
+            }));
+            combinedData = combinedData.concat(redditPosts);
+        }
+
+        // 3. Process Stock Data (from results[2])
+        if (results[2].status === 'fulfilled' && results[2].value) {
+            const stockItems = results[2].value.map(stock => ({
+                date: new Date().toISOString().split('T')[0],
+                product: `${stock.symbol} Stock`,
+                priceTrend: `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}`,
+                sentiment: stock.change > 0 ? 'Positive' : (stock.change < 0 ? 'Negative' : 'Neutral'),
+                volume: stock.volume ? stock.volume.toLocaleString() : 'N/A',
+                source: 'Stock Market',
+            }));
+            combinedData = combinedData.concat(stockItems);
+        }
+
+        // 4. Process Scraped Data (from results[4])
+        if (results[4].status === 'fulfilled' && results[4].value) {
+            const scrapedItems = results[4].value.map(item => ({
+                date: new Date(item.scraped).toISOString().split('T')[0],
+                product: this.extractProductFromText(item.title),
+                priceTrend: 'N/A',
+                sentiment: this.analyzeSentiment(item.title),
+                volume: 'N/A',
+                source: item.source,
+            }));
+            combinedData = combinedData.concat(scrapedItems);
+        }
+        
+        console.log(`Processed ${combinedData.length} total data points.`);
+        return combinedData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    extractProductFromText(text) {
+        const lowerText = text.toLowerCase();
+        if (lowerText.includes('inverter')) return 'Inverter';
+        if (lowerText.includes('battery') || lowerText.includes('storage')) return 'Battery System';
+        if (lowerText.includes('panel') || lowerText.includes('photovoltaic')) return 'Solar Panel';
+        return 'General Solar';
+    }
+    // --- END OF ADDED CODE --- //
+
     // Fetch news data from NewsAPI
     async fetchNewsData(category) {
         const keywords = this.getCategoryKeywords(category);
@@ -220,7 +290,7 @@ class SolarMarketAnalyzer {
         try {
             // Scraping from public RSS feeds and websites
 const sources = [
-    ' https://www.energy.gov/eere/solar/solar-news',
+    'https://www.energy.gov/eere/solar/solar-news',
     'https://www.seia.org/news',
     'https://www.renewableenergyworld.com/solar/'
 ];
@@ -510,7 +580,7 @@ function generateCSV(data) {
     if (!data || data.length === 0) return '';
     
     const headers = Object.keys(data[0]);
-    const rows = data.map(row => headers.map(header => row[header]).join(','));
+    const rows = data.map(row => headers.map(header => String(row[header]).replace(/,/g, ' ')).join(','));
     
     return [headers.join(','), ...rows].join('\n');
 }
